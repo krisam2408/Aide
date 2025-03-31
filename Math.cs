@@ -50,6 +50,31 @@ public static class Math
         return false;
     }
 
+    public static int Floor(this float value)
+    {
+        float dec = value % 1;
+        int result = (int)(value - dec);
+        return result;
+    }
+
+    public static int Ceil(this float value)
+    {
+        float dec = value % 1;
+        int result = (int)(value - dec);
+        if (dec > 0)
+            result++;
+        return result;
+    }
+
+    public static int Round(this float value)
+    {
+        float dec = value % 1;
+        int result = (int)(value - dec);
+        if (dec >= 0.5f)
+            result++;
+        return result;
+    }
+
     public static float Percentage(this IEnumerable<bool> values)
     {
         float len = values.Count();

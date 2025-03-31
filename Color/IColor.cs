@@ -2,10 +2,10 @@
 
 public interface IColor
 {
-    float Alpha { get; set; }
-    int Opacity { get; set; }
+    byte Alpha { get; set; }
+    float Opacity { get; set; }
 
     string Hexcode();
-    T ToColor<T>();
-    int[] Channels();
+    T ToColor<T>() where T : IColor;
+    byte[] Channels();
 }
