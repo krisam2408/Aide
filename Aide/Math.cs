@@ -183,17 +183,4 @@ public static class Math
 
         return result.ToArray();
     }
-
-    public static double Lerp(double a, double b, double t)
-    {
-        t = t.Clamp(0, 1);
-        return a + (b - a) * t;
-    }
-
-    public static double LerpValue(double a, double b, double l)
-    {
-        if (a == b)
-            return l;
-        return (l - a) / (b - a);
-    }
 }
