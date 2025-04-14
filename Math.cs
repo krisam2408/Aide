@@ -34,6 +34,15 @@ public static class Math
         return value;
     }
 
+    public static double Clamp(this double value, double min, double max)
+    {
+        if (value < min)
+            return min;
+        if (value > max)
+            return max;
+        return value;
+    }
+
     public static float ClampToOne(this float value) => Clamp(value, 0f, 1f);
 
     public static bool BetweenInc(this int value, int min, int max)
@@ -173,5 +182,18 @@ public static class Math
             result.Add(value * weight / weightSum);
 
         return result.ToArray();
+    }
+
+    public static double Lerp(double a, double b, double t)
+    {
+        t = t.Clamp(0, 1);
+        return a + (b - a) * t;
+    }
+
+    public static double LerpValue(double a, double b, double l)
+    {
+        if (a == b)
+            return l;
+        return (l - a) / (b - a);
     }
 }
