@@ -25,7 +25,8 @@ internal class FunctionGraphicTask : MainTask
     }
 
     private readonly string m_output;
-    private readonly int m_margin = 16;
+    private const int m_margin = 96;
+    private const int m_size = 512;
     private readonly System.Drawing.Color m_background = System.Drawing.Color.FromArgb(24, 24, 24);
     private readonly System.Drawing.Color m_lines = System.Drawing.Color.FromArgb(198, 198, 198);
     private readonly System.Drawing.Color m_dots = System.Drawing.Color.FromArgb(198, 50, 198);
@@ -41,17 +42,22 @@ internal class FunctionGraphicTask : MainTask
         {
             double[] data = PrepData(function);
 
-            using (Bitmap bmp = new(255, 255))
+            using (Bitmap bmp = new(m_size, m_size))
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 g.Clear(m_background);
 
                 DrawLines(g);
 
-                foreach(double d in data)
-                    DrawDots(g, d);
+                for(int i = 0; i < data.Length; i++)
+                    DrawDots(g, i, data[i]);
 
-                bmp.Save($"{m_output}{function}.png");
+                int index = (int)function;
+                string id = index
+                    .ToString()
+                    .PadLeft(2, '0');
+
+                bmp.Save($"{m_output}{id}_{function}.png");
             }
         }
 
@@ -106,10 +112,16 @@ internal class FunctionGraphicTask : MainTask
     private void DrawLines(Graphics g)
     {
         Brush brush = new SolidBrush(m_lines);
-        g.FillRectangle(brush, m_margin, m_margin, 4, 255 - m_margin*2);
-        g.FillRectangle(brush, m_margin, 255 - m_margin, 255 - m_margin * 2, 4);
+        g.FillRectangle(brush, m_margin, m_margin, 4, m_size - m_margin*2);
+        g.FillRectangle(brush, m_margin, m_size - m_margin, m_size - m_margin * 2, 4);
     }
 
-    private void DrawDots(Graphics g, double data) { }
+    private void DrawDots(Graphics g, int index, double data) 
+    {
+        Brush brush = new SolidBrush(m_dots);
+        int x = m_margin + Math.Round(index*0.01f * (m_size-m_margin*2f));
+        int y = Math.Round((float)(m_size -m_margin-(data*(m_size -m_margin*2))));
+        g.FillEllipse(brush, x, y, 4, 4);
+    }
         
 }

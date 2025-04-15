@@ -28,7 +28,7 @@ public static class Easings
     public static double OutSine(double t)
     {
         t = t.Clamp(0, 1);
-        return 1 - MathD.Sin((t * MathD.PI) * 0.5);
+        return MathD.Sin(t * MathD.PI * 0.5);
     }
 
     public static double OutSineTValue(double l) => throw new NotImplementedException();
@@ -188,7 +188,7 @@ public static class Easings
             return MathD.Pow(2, 20 * t - 10) * 0.5;
 
         if (t < 1)
-            return (2 - MathD.Pow(2, -20 * t + 10) * 0.5);
+            return (2 - MathD.Pow(2, -20 * t + 10)) * 0.5;
 
         return 1;
     }
@@ -198,7 +198,7 @@ public static class Easings
     public static double InCirc(double t)
     {
         t = t.Clamp(0, 1);
-        return MathD.Sqrt(1 - MathD.Pow(t, 2));
+        return 1 - MathD.Sqrt(1 - MathD.Pow(t, 2));
     }
 
     public static double InCircTValue(double l) => throw new NotImplementedException();
@@ -218,7 +218,7 @@ public static class Easings
         if (t < 0.5)
             return (1 - MathD.Sqrt(1 - MathD.Pow(2 * t, 2))) * 0.5;
 
-        return (MathD.Sqrt(1 - MathD.Pow(-2 * t + 2, 2))) * 0.5;
+        return (MathD.Sqrt(1 - MathD.Pow(-2 * t + 2, 2)) + 1) * 0.5;
     }
 
     public static double InOutCircTValue(double l) => throw new NotImplementedException();
@@ -333,21 +333,13 @@ public static class Easings
         if (t < cn1[0])
             return cn0 * MathD.Pow(t, 2);
 
-        double tt;
         if (t < cn1[2])
-        {
-            tt = t - cn1[1];
-            return cn0 * tt * t + 0.75;
-        }
+            return cn0 * (t -= cn1[1]) * t + 0.75;
 
         if (t < cn1[4])
-        {
-            tt = t - cn1[3];
-            return cn0 * tt * t + 0.9375;
-        }
+            return cn0 * (t -= cn1[3]) * t + 0.9375;
 
-        tt = t - cn1[5];
-        return cn0 * tt * t + 0.984375;
+        return cn0 * (t -= cn1[5]) * t + 0.984375;
     }
 
     public static double OutBounceTValue(double l) => throw new NotImplementedException();
