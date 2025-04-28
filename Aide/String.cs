@@ -73,4 +73,23 @@ public static class String
 
         return str;
     }
+
+    public static bool TryParseBool(this string str, out bool b)
+    {
+        b = false;
+        str = str
+            .Trim()
+            .ToLower();
+
+        if(str == "true" || str == "1")
+        {
+            b = true;
+            return true;
+        }
+
+        if (str == "false" || str == "0")
+            return true;
+
+        return false;
+    }
 }

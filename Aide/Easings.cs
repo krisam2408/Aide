@@ -10,7 +10,20 @@ public static class Easings
         return a + (b - a) * t;
     }
 
+    public static float Lerp(float a, float b, float t)
+    {
+        t = t.Clamp(0, 1);
+        return a + (b - a) * t;
+    }
+
     public static double LerpTValue(double a, double b, double l)
+    {
+        if (a == b)
+            return l;
+        return (l - a) / (b - a);
+    }
+
+    public static float LerpTValue(float a, float b, float l)
     {
         if (a == b)
             return l;
@@ -20,10 +33,31 @@ public static class Easings
     public static double InSine(double t)
     {
         t = t.Clamp(0, 1);
-        return 1 - MathD.Cos((t * MathD.PI) * 0.5);
+        return 1 - MathD.Cos(t * MathD.PI * 0.5);
+    }
+
+    public static double InSine(double a, double b, double t)
+    {
+        double checkSign()
+        {
+            if (a < b)
+                return 1;
+            return -1;
+        }
+
+        double sign = checkSign();
+        return a + InSine(t) * b * sign;
+    }
+
+    public static float InSine(float t)
+    {
+        t = t.Clamp(0, 1);
+        return 1 - MathF.Cos(t * MathF.PI * 0.5f);
     }
 
     public static double InSineTValue(double l) => throw new NotImplementedException();
+
+    public static float InSineTValue(float l) => throw new NotImplementedException();
 
     public static double OutSine(double t)
     {
@@ -31,7 +65,15 @@ public static class Easings
         return MathD.Sin(t * MathD.PI * 0.5);
     }
 
+    public static float OutSine(float t)
+    {
+        t = t.Clamp(0, 1);
+        return MathF.Sin(t * MathF.PI * 0.5f);
+    }
+
     public static double OutSineTValue(double l) => throw new NotImplementedException();
+
+    public static float OutSineTValue(float l) => throw new NotImplementedException();
 
     public static double InOutSine(double t)
     {
@@ -39,7 +81,15 @@ public static class Easings
         return -(MathD.Cos(MathD.PI * t) - 1) * 0.5;
     }
 
+    public static float InOutSine(float t)
+    {
+        t = t.Clamp(0, 1);
+        return -(MathF.Cos(MathF.PI * t) - 1) * 0.5f;
+    }
+
     public static double InOutSineTValue(double l) => throw new NotImplementedException();
+
+    public static float InOutSineTValue(float l) => throw new NotImplementedException();
 
     public static double InQuad(double t) 
     {
@@ -47,7 +97,15 @@ public static class Easings
         return MathD.Pow(t, 2);
     }
 
+    public static float InQuad(float t) 
+    {
+        t = t.Clamp(0, 1);
+        return MathF.Pow(t, 2);
+    }
+
     public static double InQuadTValue(double l) => throw new NotImplementedException();
+
+    public static float InQuadTValue(float l) => throw new NotImplementedException();
 
     public static double OutQuad(double t)
     {
@@ -55,7 +113,15 @@ public static class Easings
         return 1 - MathD.Pow(1 - t, 2);
     }
 
+    public static float OutQuad(float t)
+    {
+        t = t.Clamp(0, 1);
+        return 1 - MathF.Pow(1 - t, 2);
+    }
+
     public static double OutQuadTValue(double l) => throw new NotImplementedException();
+
+    public static float OutQuadTValue(float l) => throw new NotImplementedException();
 
     public static double InOutQuad(double t)
     {
@@ -67,7 +133,19 @@ public static class Easings
         return 1 - MathD.Pow(-2 * t + 2, 2) * 0.5;
     }
 
+    public static float InOutQuad(float t)
+    {
+        t = t.Clamp(0, 1);
+        
+        if(t < 0.5)
+            return 2 * MathF.Pow(t, 2);
+
+        return 1 - MathF.Pow(-2 * t + 2, 2) * 0.5f;
+    }
+
     public static double InOutQuadTValue(double l) => throw new NotImplementedException();
+
+    public static float InOutQuadTValue(float l) => throw new NotImplementedException();
 
     public static double InCubic(double t)
     {
@@ -75,12 +153,26 @@ public static class Easings
         return MathD.Pow(t, 3);
     }
 
+    public static float InCubic(float t)
+    {
+        t = t.Clamp(0, 1);
+        return MathF.Pow(t, 3);
+    }
+
     public static double InCubicTValue(double l) => throw new NotImplementedException();
+
+    public static float InCubicTValue(float l) => throw new NotImplementedException();
 
     public static double OutCubic(double t)
     {
         t = t.Clamp(0, 1);
         return 1 - MathD.Pow(1 - t, 3);
+    }
+
+    public static float OutCubic(float t)
+    {
+        t = t.Clamp(0, 1);
+        return 1 - MathF.Pow(1 - t, 3);
     }
 
     public static double OutCubicTValue(double l) => throw new NotImplementedException();

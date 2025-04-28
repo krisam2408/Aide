@@ -15,7 +15,9 @@ public sealed class Program
         List<MainTask> tasks = 
         [
             new ExampleTask(m_output),
-            new FunctionGraphicTask(m_output)
+            new FunctionGraphic01Task(m_output),
+            new FunctionGraphicTask(m_output),
+            new RevFunctionGraphicTask(m_output)
         ];
 
         Terminal terminal = ConsoleTerminal.CreateTerminal(tasks);

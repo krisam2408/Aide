@@ -5,22 +5,22 @@ using TerminalWrapper;
 namespace Aide.Testing.Tasks;
 
 [SupportedOSPlatform("windows")]
-internal class FunctionGraphicTask : MainTask
+internal class RevFunctionGraphicTask : MainTask
 {
-    public override string TaskName => "Try Graphics 0-288";
+    public override string TaskName => "Try Graphics 288-0";
 
     private readonly string m_output;
-    private const string m_folder = "02";
+    private const string m_folder = "03";
     private const int m_xMargin = 32;
     private const int m_yMargin = 112;
     private const int m_size = 512;
-    private const int m_startValue = 0;
-    private const int m_endValue = 288;
+    private const int m_startValue = 288;
+    private const int m_endValue = 0;
     private readonly System.Drawing.Color m_background = System.Drawing.Color.FromArgb(24, 24, 24);
     private readonly System.Drawing.Color m_lines = System.Drawing.Color.FromArgb(198, 198, 198);
     private readonly System.Drawing.Color m_dots = System.Drawing.Color.FromArgb(198, 50, 198);
 
-    public FunctionGraphicTask(string output)
+    public RevFunctionGraphicTask(string output)
     {
         m_output = output;
     }

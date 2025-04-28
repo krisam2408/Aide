@@ -5,22 +5,20 @@ using TerminalWrapper;
 namespace Aide.Testing.Tasks;
 
 [SupportedOSPlatform("windows")]
-internal class FunctionGraphicTask : MainTask
+internal class FunctionGraphic01Task : MainTask
 {
-    public override string TaskName => "Try Graphics 0-288";
+    public override string TaskName => "Try Graphics 0-1";
 
     private readonly string m_output;
-    private const string m_folder = "02";
+    private const string m_folder = "01";
     private const int m_xMargin = 32;
     private const int m_yMargin = 112;
     private const int m_size = 512;
-    private const int m_startValue = 0;
-    private const int m_endValue = 288;
     private readonly System.Drawing.Color m_background = System.Drawing.Color.FromArgb(24, 24, 24);
     private readonly System.Drawing.Color m_lines = System.Drawing.Color.FromArgb(198, 198, 198);
     private readonly System.Drawing.Color m_dots = System.Drawing.Color.FromArgb(198, 50, 198);
 
-    public FunctionGraphicTask(string output)
+    public FunctionGraphic01Task(string output)
     {
         m_output = output;
     }
@@ -30,11 +28,8 @@ internal class FunctionGraphicTask : MainTask
         if (!Directory.Exists($"{m_output}{m_folder}"))
             Directory.CreateDirectory($"{m_output}{m_folder}");
 
-        int maxFunctions = 2;
-
-        for (int i = 0; i < maxFunctions; i++)
+        foreach (Functions function in Enum.GetValues(typeof(Functions)))
         {
-            Functions function = (Functions)i;
             double[] data = PrepData(function);
 
             using (Bitmap bmp = new(m_size, m_size))
@@ -44,8 +39,8 @@ internal class FunctionGraphicTask : MainTask
 
                 DrawLines(g);
 
-                for(int e = 0; e < data.Length; e++)
-                    DrawDots(g, e, data[e]);
+                for(int i = 0; i < data.Length; i++)
+                    DrawDots(g, i, data[i]);
 
                 int index = (int)function;
                 string id = index
@@ -66,7 +61,7 @@ internal class FunctionGraphicTask : MainTask
         {
             double d = function switch
             { 
-                Functions.inSine => Easings.InSine(m_startValue, m_endValue, t),
+                Functions.inSine => Easings.InSine(0,1,t),
                 Functions.outSine => Easings.OutSine(t),
                 Functions.inOutSine => Easings.InOutSine(t),
                 Functions.inQuad => Easings.InQuad(t),
@@ -96,7 +91,7 @@ internal class FunctionGraphicTask : MainTask
                 Functions.inBounce => Easings.InBounce(t),
                 Functions.outBounce => Easings.OutBounce(t),
                 Functions.inOutBounce => Easings.InOutBounce(t),
-                _ => Easings.Lerp(m_startValue, m_endValue, t)
+                _ => Easings.Lerp(0, 1, t)
             };
             data.Add(d);
         }
@@ -115,7 +110,7 @@ internal class FunctionGraphicTask : MainTask
     {
         Brush brush = new SolidBrush(m_dots);
         int x = m_xMargin + Math.Round(index * 0.01f * (m_size - m_xMargin * 2f));
-        int y = Math.Round((float)(m_size - m_yMargin - data));
+        int y = Math.Round((float)(m_size - m_yMargin - (data * (m_size - m_yMargin * 2))));
         g.FillEllipse(brush, x, y, 4, 4);
     }
         
