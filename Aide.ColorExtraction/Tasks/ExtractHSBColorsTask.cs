@@ -2,6 +2,7 @@
 using CsvHelper;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Edge;
+using OpenQA.Selenium.Interactions;
 using System.Globalization;
 using TerminalWrapper;
 
@@ -112,7 +113,6 @@ internal class ExtractHSBColorsTask : MainTask
         await Task.Delay(16, token);
         
         int hsbTries = 5;
-
         do
         {
             IWebElement[] spectrumItems = GetElements(driver, By.CssSelector("span.spectrum-Menu-itemLabel span"));
@@ -130,28 +130,54 @@ internal class ExtractHSBColorsTask : MainTask
             hsbTries--;
         } while (hsbTries > 0);
 
-        IWebElement[] sliderButtons = GetElements(driver, By.CssSelector(".spectrum-Button--primary.Swatch__slidersAndLabels___Eu5av"));
+        Actions actions = new(driver);
+        Actions downArrow = actions.SendKeys(Keys.ArrowDown);
+
+        int sliderTries = 20;
+        do
+        {
+            IWebElement[] sliderButtons = GetElements(driver, By.CssSelector(".spectrum-Button--primary.Swatch__slidersAndLabels___Eu5av"));
         
-        if(sliderButtons.Length == 0)
+            if(sliderButtons.Length == 0)
+            {
+                PerformThrice(downArrow);
+                continue;
+            }
+
+            if(ClickInteractable(sliderButtons))
+            {
+                sliderTries = -1;
+            }
+
+            sliderTries--;
+
+        }while(sliderTries > 0);
+
+        int hexTries = 16;
+        IWebElement? hex = null;
+        do
         {
-            await Terminal.WriteAsync("Slider buttons not found...");
+            IWebElement[] hexInputs = GetElements(driver, By.CssSelector("input[type=text].HexInputField__hexInputField___cmU7v"));
+
+            if(hexInputs.Length == 0)
+            {
+                PerformThrice(downArrow);
+                hexTries--;
+                continue;
+            }
+
+            hex = hexInputs[0];
+            hexTries = -1;
+
+        }while(hexTries > 0);
+
+        if(hex is null)
+        {
+            await Terminal.WriteAsync("Hex input not found...");
             return;
         }
 
-        ClickInteractable(sliderButtons);
-        await Task.Delay(24, token);
-
-        IWebElement[] hexInputs = GetElements(driver, By.CssSelector("input[type=text].HexInputField__hexInputField___cmU7v"));
-
-        if(hexInputs.Length == 0)
-        {
-            await Terminal.WriteAsync("Hex inputs not found...");
-            return;
-        }
-
-        IWebElement hex = hexInputs[0];
-
-        IWebElement[] valueInputs = GetElements(driver, By.CssSelector("input[type=number]"));
+        IWebElement[] valueInputs = GetElements(driver, By.CssSelector(".Colorwheel__swatchDisplay___WKyUI:first-child input[type=number]"));
         
         if (valueInputs.Length == 0)
         {
@@ -251,20 +277,21 @@ internal class ExtractHSBColorsTask : MainTask
         }
     }
 
-    private static void ClickInteractable(IWebElement[] elements)
+    private static bool ClickInteractable(IWebElement[] elements)
     {
         foreach (IWebElement element in elements)
         {
             try
             {
                 element.Click();
-                return;
+                return true;
             }
             catch (ElementNotInteractableException)
             {
                 continue;
             }
         }
+        return false;
     }
 
     private static void SetValue(IWebElement element, string value)
@@ -292,5 +319,11 @@ internal class ExtractHSBColorsTask : MainTask
         {
             return "";
         }
+    }
+
+    private static void PerformThrice(Actions action)
+    {
+        for (int i = 0; i < 3; i++)
+            action.Perform();
     }
 }
