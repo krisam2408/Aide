@@ -84,6 +84,15 @@ public static class Math
         return result;
     }
 
+    public static int Round(this double value)
+    {
+        double dec = value % 1;
+        int result = (int)(value - dec);
+        if (dec >= 0.5f)
+            result++;
+        return result;
+    }
+
     public static float Percentage(this IEnumerable<bool> values)
     {
         float len = values.Count();
