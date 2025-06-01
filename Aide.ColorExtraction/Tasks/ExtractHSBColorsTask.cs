@@ -131,7 +131,9 @@ internal class ExtractHSBColorsTask : MainTask
         } while (hsbTries > 0);
 
         Actions actions = new(driver);
-        Actions downArrow = actions.SendKeys(Keys.ArrowDown);
+        Actions windowEnd = actions.SendKeys(Keys.End);
+        windowEnd.Perform();
+
 
         int sliderTries = 20;
         do
@@ -140,7 +142,7 @@ internal class ExtractHSBColorsTask : MainTask
         
             if(sliderButtons.Length == 0)
             {
-                PerformThrice(downArrow);
+                sliderTries--;
                 continue;
             }
 
@@ -161,7 +163,6 @@ internal class ExtractHSBColorsTask : MainTask
 
             if(hexInputs.Length == 0)
             {
-                PerformThrice(downArrow);
                 hexTries--;
                 continue;
             }
