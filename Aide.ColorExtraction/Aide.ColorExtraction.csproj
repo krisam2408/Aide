@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="output\" />
+    <Folder Include="output\hsb\" />
   </ItemGroup>
 
 </Project>

@@ -11,28 +11,31 @@ namespace Aide.ColorExtraction.Tasks;
 internal class ExtractHSBColorsTask : MainTask
 {
     private const string Locale = "en-US";
-    private readonly string m_outputPath;
+    private readonly string m_outputDirectory;
+    private const string m_filenamePattern = "adobe_hsb_b*.csv";
     
     public override string TaskName => "Extract HSB Colors";
 
-    List<HSBValue> m_results = [];
+    private readonly List<HSBValue> m_results = [];
 
     public ExtractHSBColorsTask(string outputPath)
     {
-        m_outputPath = $"{outputPath}adobe_hsv.csv";
+        m_outputDirectory = $"{outputPath}hsb/";
     }
 
     public override async Task ExecuteAsync(CancellationToken cancelToken)
     {        
         await Terminal.WriteAsync("Opening WebDriver");
 
-        CheckPreviousRecords();
+        int currentBrightness = CheckPreviousRecords();
+
+        await Terminal.WriteAsync($"Extracting colors for Brightness {currentBrightness}");
 
         try
         {
-            using(EdgeDriver driver = OpenNavigator())
+            using (EdgeDriver driver = OpenNavigator())
             {
-                await GetResults(driver, cancelToken);
+                await GetResults(driver, currentBrightness, cancelToken);
             }
         }
         catch (TaskCanceledException)
@@ -43,7 +46,14 @@ internal class ExtractHSBColorsTask : MainTask
         {
             await Terminal.WriteAsync($"Done checking with {m_results.Count} entries...");
 
-            using (StreamWriter sw = new(m_outputPath))
+            string brgId = currentBrightness
+                .ToString()
+                .PadLeft(3, '0');
+
+            string filename = m_filenamePattern
+                .Replace("*", brgId);
+
+            using (StreamWriter sw = new($"{m_outputDirectory}{filename}"))
             using (CsvWriter csv = new(sw, CultureInfo.GetCultureInfo(Locale)))
             {
                 csv.WriteRecords(m_results);
@@ -65,29 +75,40 @@ internal class ExtractHSBColorsTask : MainTask
         return new EdgeDriver(options);
     }
 
-    private void CheckPreviousRecords()
+    private int CheckPreviousRecords()
     {
-        m_results = [];
+        m_results.Clear();
 
-        if(File.Exists(m_outputPath))
-        {
-            using StreamReader sr = new(m_outputPath);
-            using CsvReader csv = new(sr, CultureInfo.GetCultureInfo(Locale));
-            HSBValue[] records = csv
-                .GetRecords<HSBValue>()
-                .ToArray();
+        string[] existingFiles = Directory
+            .GetFiles(m_outputDirectory)
+            .OrderByDescending(n => n)
+            .ToArray();
 
-            records = records
-                .OrderBy(c => c.Hue)
-                .ThenByDescending(c => c.Saturation)
-                .ThenByDescending(c => c.Brightness)
-                .ToArray();
+        if (existingFiles.Length == 0)
+            return 100;
 
-            m_results.AddRange(records);
-        }
+        string lastFile = existingFiles.Last();
+        using StreamReader sr = new(lastFile);
+        using CsvReader csv = new(sr, CultureInfo.GetCultureInfo(Locale));
+        HSBValue[] records = csv
+            .GetRecords<HSBValue>()
+            .OrderByDescending(c => c.Brightness)
+            .ThenByDescending(c => c.Saturation)
+            .ThenBy(c => c.Hue)
+            .ToArray();
+
+        HSBValue lastValue = records.Last();
+        int currBrg = lastValue.Brightness;
+        lastValue++;
+
+        if (lastValue.Brightness < currBrg)
+            return lastValue.Brightness;
+
+        m_results.AddRange(records);
+        return currBrg;
     }
 
-    private async Task GetResults(EdgeDriver driver, CancellationToken token)
+    private async Task GetResults(EdgeDriver driver, int currentBrightness, CancellationToken token)
     {
         #region Setting up
         await driver.Navigate()
@@ -97,6 +118,8 @@ internal class ExtractHSBColorsTask : MainTask
         await Terminal.WriteAsync("Waiting 4 seconds...");
 
         await Task.Delay(4000, token);
+
+        driver.ExecuteScript("document.body.style.zoom='70%'");
 
         IWebElement? boardingPanel = GetElement(driver, By.ClassName("OnBoardingTourDialog__tourDialogModal___utC65"));
         if(boardingPanel is not null)
@@ -130,10 +153,7 @@ internal class ExtractHSBColorsTask : MainTask
             hsbTries--;
         } while (hsbTries > 0);
 
-        Actions actions = new(driver);
-        Actions windowEnd = actions.SendKeys(Keys.End);
-        windowEnd.Perform();
-
+        PressEnd(driver);
 
         int sliderTries = 20;
         do
@@ -142,13 +162,15 @@ internal class ExtractHSBColorsTask : MainTask
         
             if(sliderButtons.Length == 0)
             {
+                PressEnd(driver);
                 sliderTries--;
                 continue;
             }
 
             if(ClickInteractable(sliderButtons))
             {
-                sliderTries = -1;
+                await Task.Delay(8,token);
+                break;
             }
 
             sliderTries--;
@@ -159,10 +181,11 @@ internal class ExtractHSBColorsTask : MainTask
         IWebElement? hex = null;
         do
         {
-            IWebElement[] hexInputs = GetElements(driver, By.CssSelector("input[type=text].HexInputField__hexInputField___cmU7v"));
+            IWebElement[] hexInputs = GetElements(driver, By.CssSelector(".Colorwheel__swatchDisplay___WKyUI:first-child input[type=text].HexInputField__hexInputField___cmU7v"));
 
             if(hexInputs.Length == 0)
             {
+                PressEnd(driver);
                 hexTries--;
                 continue;
             }
@@ -194,7 +217,7 @@ internal class ExtractHSBColorsTask : MainTask
         token.ThrowIfCancellationRequested();
 
         #region Extract Colors
-        int sb = 100;
+        int sb = currentBrightness;
         int ss = 100;
         int sh = 0;
 
@@ -207,44 +230,39 @@ internal class ExtractHSBColorsTask : MainTask
             sh = last.Hue;
         }
 
-        for(int b = sb; b >= 0; b--)
+        for(int s = ss; s >= 0; s--)
         {
-            for(int s = ss; s >= 0; s--)
+            for(int h = sh; h < 360; h++)
             {
-                for(int h = sh; h < 360; h++)
+                token.ThrowIfCancellationRequested();
+
+                SetValue(hue, h.ToString());
+                SetValue(sat, s.ToString());
+                SetValue(brg, sb.ToString());
+
+                token.ThrowIfCancellationRequested();
+
+                await Task.Delay(8, token);
+
+                token.ThrowIfCancellationRequested();
+
+                string hexValue = GetValue(hex);
+
+                if(!string.IsNullOrWhiteSpace(hexValue))
                 {
-                    token.ThrowIfCancellationRequested();
-
-                    SetValue(hue, h.ToString());
-                    SetValue(sat, s.ToString());
-                    SetValue(brg, b.ToString());
-
-                    token.ThrowIfCancellationRequested();
-
-                    await Task.Delay(8, token);
-
-                    token.ThrowIfCancellationRequested();
-
-                    string hexValue = GetValue(hex);
-
-                    if(!string.IsNullOrWhiteSpace(hexValue))
+                    HSBValue value = new()
                     {
-                        HSBValue value = new()
-                        {
-                            Hue = h,
-                            Saturation = s,
-                            Brightness = b,
-                            Hex = hexValue
-                        };
+                        Hue = h,
+                        Saturation = s,
+                        Brightness = sb,
+                        Hex = hexValue
+                    };
 
-                        m_results.Add(value);
-                    }
+                    m_results.Add(value);
                 }
-                sh = 0;
             }
-            ss = 100;
+            sh = 0;
         }
-
         #endregion
     }
 
@@ -322,9 +340,10 @@ internal class ExtractHSBColorsTask : MainTask
         }
     }
 
-    private static void PerformThrice(Actions action)
+    private static void PressEnd(EdgeDriver driver)
     {
-        for (int i = 0; i < 3; i++)
-            action.Perform();
+        Actions actions = new(driver);
+        Actions windowEnd = actions.SendKeys(Keys.End);
+        windowEnd.Perform();
     }
 }
