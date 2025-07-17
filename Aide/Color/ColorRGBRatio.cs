@@ -1,6 +1,6 @@
 ﻿namespace Aide.Color;
 
-public class ColorRGBRatio : IColor
+public sealed class ColorRGBRatio : IColor
 {
     private float m_red;
     public float Red { get => m_red; set => m_red = value.ClampToOne(); }
@@ -25,21 +25,41 @@ public class ColorRGBRatio : IColor
         set => m_opacity = value / 255f;
     }
 
+    public ColorRGBRatio(float red, float green, float blue, float opacity)
+    {
+        Red = red;
+        Green = green;
+        Blue = blue;
+        Opacity = opacity;
+    }
+
+    public ColorRGBRatio(float red, float green, float blue) : this(red, green, blue, 1f) { }
+
+    public ColorRGBRatio() : this(1f, 1f, 1f) { }
+
     private static byte ToByte(float value) => (byte)(value * 255)
         .Round()
         .Clamp(0,255);
 
-    public byte[] Channels() =>
+    public byte[] RGBChannels() =>
     [
         ToByte(Red),
         ToByte(Green),
-        ToByte(Blue),
-        Alpha
+        ToByte(Blue)
+    ];
+
+    public byte[] ARGBChannels() =>
+    [
+        ToByte(Alpha),
+        ToByte(Red),
+        ToByte(Green),
+        ToByte(Blue)
     ];
 
     public string Hexcode()
     {
-        throw new NotImplementedException();
+        ColorRGB rgb = ToColor<ColorRGB>();
+        return rgb.Hexcode();
     }
 
     public T ToColor<T>() where T : IColor

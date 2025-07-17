@@ -7,5 +7,6 @@ public interface IColor
 
     string Hexcode();
     T ToColor<T>() where T : IColor;
-    byte[] Channels();
+    byte[] RGBChannels();
+    byte[] ARGBChannels();
 }
