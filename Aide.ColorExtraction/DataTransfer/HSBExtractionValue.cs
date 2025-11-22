@@ -1,13 +1,13 @@
 ﻿namespace Aide.ColorExtraction.DataTransfer;
 
-public struct HSBValue
+public struct HSBExtractionValue
 {
     public int Hue { get; set; }
     public int Saturation { get; set; }
     public int Brightness { get; set; }
     public string Hex { get; set; }
 
-    public static HSBValue operator ++(HSBValue a)
+    public static HSBExtractionValue operator ++(HSBExtractionValue a)
     {
         a.Hue++;
 
@@ -28,4 +28,6 @@ public struct HSBValue
 
         return a;
     }
+
+    public readonly string ToTerminal() => $"{Hex} -> ({Hue} - {Saturation} - {Brightness})";
 }

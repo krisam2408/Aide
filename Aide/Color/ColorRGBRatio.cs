@@ -2,30 +2,42 @@
 
 public sealed class ColorRGBRatio : IColor
 {
-    private float m_red;
-    public float Red { get => m_red; set => m_red = value.ClampToOne(); }
+    public double Red 
+    { 
+        get => field; 
+        set => field = value.Clamp(); 
+    }
 
-    private float m_green;
-    public float Green { get => m_green; set => m_green = value.ClampToOne(); }
+    public double Green 
+    { 
+        get => field; 
+        set => field = value.Clamp(); 
+    }
 
-    private float m_blue;
-    public float Blue { get => m_blue; set => m_blue = value.ClampToOne(); }
+    public double Blue 
+    { 
+        get => field; 
+        set => field = value.Clamp(); 
+    }
 
-    private float m_opacity;
-    public float Opacity { get => m_opacity; set => m_opacity = value.ClampToOne(); }
+    public double Opacity 
+    { 
+        get => field; 
+        set => field = value.Clamp(); 
+    }
 
     public byte Alpha 
     {
         get 
         {
-            float op = m_opacity * 255;
+            double op = Opacity * 255;
             return (byte)op
                 .Clamp(0, 255);
         }
-        set => m_opacity = value / 255f;
+        set => Opacity = value / 255f;
     }
 
-    public ColorRGBRatio(float red, float green, float blue, float opacity)
+    public ColorRGBRatio(double red, double green, double blue, double opacity)
     {
         Red = red;
         Green = green;
@@ -33,11 +45,11 @@ public sealed class ColorRGBRatio : IColor
         Opacity = opacity;
     }
 
-    public ColorRGBRatio(float red, float green, float blue) : this(red, green, blue, 1f) { }
+    public ColorRGBRatio(double red, double green, double blue) : this(red, green, blue, 1) { }
 
     public ColorRGBRatio() : this(1f, 1f, 1f) { }
 
-    private static byte ToByte(float value) => (byte)(value * 255)
+    private static byte ToByte(double value) => (byte)(value * 255)
         .Round()
         .Clamp(0,255);
 
@@ -58,12 +70,101 @@ public sealed class ColorRGBRatio : IColor
 
     public string Hexcode()
     {
-        ColorRGB rgb = ToColor<ColorRGB>();
+        ColorRGB rgb = (ColorRGB)this;
         return rgb.Hexcode();
     }
 
-    public T ToColor<T>() where T : IColor
+    public static explicit operator ColorRGBRatio(ColorRGB color)
     {
-        throw new NotImplementedException();
+        return new()
+        {
+            Red = color.Red / 255.0,
+            Green = color.Green / 255.0,
+            Blue = color.Blue / 255.0,
+            Alpha = color.Alpha
+        };
+    }
+
+    public static explicit operator ColorRGBRatio(ColorHSB color)
+    {
+        double[] channels = [ 0, 0, 0 ];
+
+        int sectorPos = color.Hue / 120;
+        int spectrum = color.Hue - sectorPos * 120;
+
+        double[] x = 
+        [
+            1,
+            spectrum / 120.0
+        ];
+
+        int[] channelIndexes = HandleChannelIndexes(sectorPos, x);
+
+        if (x[1] > 0.5)
+            x[1] = 1 - x[1];
+
+        channels[channelIndexes[0]] = x[0];
+        channels[channelIndexes[1]] = x[1] * 2.0;
+
+        double brgCoef = color.Brightness * 0.01;
+        double satCoef = (100.0 - color.Saturation) * 0.01;
+
+        for (int i = 0; i < 3; i++)
+            channels[i] += satCoef;
+
+        //double brgCoef = color.Brightness / 100.0;
+
+        //channel[0] = channel[0] * brgCoef;
+        //channel[1] = channel[1] * brgCoef;
+        //channel[2] = channel[2] * brgCoef;
+
+        //int brgByte = 255 * color.Brightness / 100;
+        //int satByte = 255 * (100 - color.Saturation) / 100;
+        
+        //if (satByte > brgByte) 
+        //    satByte = brgByte;
+
+        //for (byte i = 0; i < 3; i++)
+        //{
+        //    if (channel[i] < satByte) channel[i] = satByte;
+        //}
+
+        return new()
+        {
+            Red = channels[0],
+            Green = channels[1],
+            Blue = channels[2],
+            Opacity = color.Opacity
+        };
+    }
+
+    private static int[] HandleChannelIndexes(int sectorPos, double[] x)
+    {
+        int channel(int value)
+        {
+            if(value > 2)
+                return 0;
+                
+            if(value < 0)
+                return 2;
+
+            return value;
+        }
+
+        int main = sectorPos;
+
+        if (x[1] > 0.5)
+            main = channel(main + 1);
+
+        int direction()
+        {
+            if (x[1] > 0.5)
+                return channel(main - 1);
+            return channel(main + 1);
+        }
+
+        int next = direction();
+
+        return [ main, next ];
     }
 }

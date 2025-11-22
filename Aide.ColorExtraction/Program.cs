@@ -5,8 +5,7 @@ using TerminalWrapper.Console;
 const string OutputPath = "../../../output/";
 
 MainTask[] tasks = [
-    new ExtractHSBColorsTask(OutputPath),
-    //new SegmentHSBResultsTask(OutputPath)
+    new CompareHSBColorTask(OutputPath),
 ];
 
 ConsoleSettings settings = new()

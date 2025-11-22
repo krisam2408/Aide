@@ -16,11 +16,11 @@ internal class ExtractHSBColorsTask : MainTask
     
     public override string TaskName => "Extract HSB Colors";
 
-    private readonly List<HSBValue> m_results = [];
+    private readonly List<HSBExtractionValue> m_results = [];
 
     public ExtractHSBColorsTask(string outputPath)
     {
-        m_outputDirectory = $"{outputPath}hsb/";
+        m_outputDirectory = $"{outputPath}adobe_hsb/";
     }
 
     public override async Task ExecuteAsync(CancellationToken cancelToken)
@@ -90,14 +90,14 @@ internal class ExtractHSBColorsTask : MainTask
         string lastFile = existingFiles.Last();
         using StreamReader sr = new(lastFile);
         using CsvReader csv = new(sr, CultureInfo.GetCultureInfo(Locale));
-        HSBValue[] records = csv
-            .GetRecords<HSBValue>()
+        HSBExtractionValue[] records = csv
+            .GetRecords<HSBExtractionValue>()
             .OrderByDescending(c => c.Brightness)
             .ThenByDescending(c => c.Saturation)
             .ThenBy(c => c.Hue)
             .ToArray();
 
-        HSBValue lastValue = records.Last();
+        HSBExtractionValue lastValue = records.Last();
         int currBrg = lastValue.Brightness;
         lastValue++;
 
@@ -223,7 +223,7 @@ internal class ExtractHSBColorsTask : MainTask
 
         if (m_results.Count > 0)
         {
-            HSBValue last = m_results.Last();
+            HSBExtractionValue last = m_results.Last();
             last++;
             sb = last.Brightness;
             ss = last.Saturation;
@@ -250,7 +250,7 @@ internal class ExtractHSBColorsTask : MainTask
 
                 if(!string.IsNullOrWhiteSpace(hexValue))
                 {
-                    HSBValue value = new()
+                    HSBExtractionValue value = new()
                     {
                         Hue = h,
                         Saturation = s,

@@ -87,7 +87,7 @@ public static class Random
 
     public static bool RandomFloat(float trueRatio)
     {
-        trueRatio = trueRatio.ClampToOne();
+        trueRatio = trueRatio.Clamp();
         float result = m_random.Next(101) / 100f;
 
         return result <= trueRatio;

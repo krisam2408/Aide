@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-namespace Aide.Color;
+﻿namespace Aide.Color;
 
 public sealed class ColorRGB : IColor
 {
@@ -9,12 +7,12 @@ public sealed class ColorRGB : IColor
     public byte Blue { get; set; }
     public byte Alpha { get; set; }
 
-    public float Opacity 
+    public double Opacity 
     {
         get => Alpha / 255f;
         set 
         {
-            float v = value.ClampToOne();
+            double v = value.Clamp();
             v *= 255;
             Alpha = (byte)v
                 .Round()
@@ -53,8 +51,20 @@ public sealed class ColorRGB : IColor
 
     public string Hexcode() => $"#{Red:X2}{Green:X2}{Blue:X2}";
 
-    public T ToColor<T>() where T : IColor
+    public static explicit operator ColorRGB(ColorRGBRatio color)
     {
-        throw new NotImplementedException();
+        return new()
+        {
+            Red = (byte)Math.Floor(color.Red * 255),
+            Green = (byte)Math.Floor(color.Green * 255),
+            Blue = (byte)Math.Floor(color.Blue * 255),
+            Alpha = color.Alpha
+        };
+    }
+
+    public static explicit operator ColorRGB(ColorHSB color)
+    {
+        ColorRGBRatio rgb = (ColorRGBRatio)color;
+        return (ColorRGB)rgb;
     }
 }

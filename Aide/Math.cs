@@ -16,7 +16,7 @@ public static class Math
         return value;
     }
 
-    public static int Clamp(this int value, int min, int max)
+    public static int Clamp(this int value, int min = 0, int max = 1)
     {
         if (value < min)
             return min;
@@ -25,7 +25,7 @@ public static class Math
         return value;
     }
 
-    public static float Clamp(this float value, float min, float max)
+    public static float Clamp(this float value, float min = 0f, float max = 1f)
     {
         if (value < min)
             return min;
@@ -34,7 +34,7 @@ public static class Math
         return value;
     }
 
-    public static double Clamp(this double value, double min, double max)
+    public static double Clamp(this double value, double min = 0, double max = 1)
     {
         if (value < min)
             return min;
@@ -42,8 +42,6 @@ public static class Math
             return max;
         return value;
     }
-
-    public static float ClampToOne(this float value) => Clamp(value, 0f, 1f);
 
     public static bool BetweenInc(this int value, int min, int max)
     {
@@ -66,9 +64,25 @@ public static class Math
         return result;
     }
 
+    public static int Floor(this double value)
+    {
+        double dec = value % 1;
+        int result = (int)(value - dec);
+        return result;
+    }
+
     public static int Ceil(this float value)
     {
         float dec = value % 1;
+        int result = (int)(value - dec);
+        if (dec > 0)
+            result++;
+        return result;
+    }
+
+    public static int Ceil(this double value)
+    {
+        double dec = value % 1;
         int result = (int)(value - dec);
         if (dec > 0)
             result++;
