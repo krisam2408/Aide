@@ -51,7 +51,7 @@ public sealed class ColorRGB : IColor
 
     public string Hexcode() => $"#{Red:X2}{Green:X2}{Blue:X2}";
 
-    public static explicit operator ColorRGB(ColorRGBRatio color)
+    public static explicit operator ColorRGB(ColorRatio color)
     {
         return new()
         {
@@ -64,7 +64,7 @@ public sealed class ColorRGB : IColor
 
     public static explicit operator ColorRGB(ColorHSB color)
     {
-        ColorRGBRatio rgb = (ColorRGBRatio)color;
+        ColorRatio rgb = (ColorRatio)color;
         return (ColorRGB)rgb;
     }
 }

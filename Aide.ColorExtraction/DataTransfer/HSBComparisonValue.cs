@@ -1,4 +1,5 @@
 ﻿using Aide.Color;
+using SkiaSharp;
 
 namespace Aide.ColorExtraction.DataTransfer;
 

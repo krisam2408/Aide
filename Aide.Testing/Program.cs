@@ -1,27 +1,18 @@
-﻿using Aide.Testing.Tasks;
-using System.Runtime.Versioning;
+﻿using Aide.Testing.Tasks.Charts;
+using Aide.Testing.Tasks.Easings;
 using TerminalWrapper;
 using TerminalWrapper.Console;
 
-namespace Aide.Testing;
+const string m_output = "../../../output/";
+CancellationToken token = new();
 
-[SupportedOSPlatform("windows")]
-public sealed class Program
-{
-    private const string m_output = "../../../output/";
+List<MainTask> tasks = 
+[
+    new LinearChartTask(m_output),
+    new BarChartTask(m_output),
+    new PieChartTask(m_output),
+];
 
-    public static async Task Main()
-    {
-        List<MainTask> tasks = 
-        [
-            new ExampleTask(m_output),
-            new FunctionGraphic01Task(m_output),
-            new FunctionGraphicTask(m_output),
-            new RevFunctionGraphicTask(m_output)
-        ];
+foreach (MainTask task in tasks)
+    await task.ExecuteAsync(token);
 
-        Terminal terminal = ConsoleTerminal.CreateTerminal(tasks);
-
-        await terminal.RunAsync();
-    }
-}

@@ -67,11 +67,11 @@ public sealed class ColorHSB : IColor
 
     public static explicit operator ColorHSB(ColorRGB color)
     {
-        ColorRGBRatio rgb = (ColorRGBRatio)color;
+        ColorRatio rgb = (ColorRatio)color;
         return (ColorHSB)rgb;
     }
 
-    public static explicit operator ColorHSB(ColorRGBRatio color)
+    public static explicit operator ColorHSB(ColorRatio color)
     {
         throw new NotImplementedException();
         //double[] channels = { color.Red, color.Green, color.Blue };

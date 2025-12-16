@@ -1,6 +1,6 @@
 ﻿namespace Aide.Color;
 
-public sealed class ColorRGBRatio : IColor
+public sealed class ColorRatio : IColor
 {
     public double Red 
     { 
@@ -31,13 +31,12 @@ public sealed class ColorRGBRatio : IColor
         get 
         {
             double op = Opacity * 255;
-            return (byte)op
-                .Clamp(0, 255);
+            return (byte)op.Clamp(0, 255);
         }
-        set => Opacity = value / 255f;
+        set => Opacity = value / 255.0;
     }
 
-    public ColorRGBRatio(double red, double green, double blue, double opacity)
+    public ColorRatio(double red, double green, double blue, double opacity)
     {
         Red = red;
         Green = green;
@@ -45,9 +44,9 @@ public sealed class ColorRGBRatio : IColor
         Opacity = opacity;
     }
 
-    public ColorRGBRatio(double red, double green, double blue) : this(red, green, blue, 1) { }
+    public ColorRatio(double red, double green, double blue) : this(red, green, blue, 1) { }
 
-    public ColorRGBRatio() : this(1f, 1f, 1f) { }
+    public ColorRatio() : this(1f, 1f, 1f) { }
 
     private static byte ToByte(double value) => (byte)(value * 255)
         .Round()
@@ -74,7 +73,7 @@ public sealed class ColorRGBRatio : IColor
         return rgb.Hexcode();
     }
 
-    public static explicit operator ColorRGBRatio(ColorRGB color)
+    public static explicit operator ColorRatio(ColorRGB color)
     {
         return new()
         {
@@ -85,7 +84,7 @@ public sealed class ColorRGBRatio : IColor
         };
     }
 
-    public static explicit operator ColorRGBRatio(ColorHSB color)
+    public static explicit operator ColorRatio(ColorHSB color)
     {
         double[] channels = [ 0, 0, 0 ];
 
